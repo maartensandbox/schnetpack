@@ -26,6 +26,7 @@ class Dense(nn.Linear):
         activation: Union[Callable, nn.Module] = None,
         weight_init: Callable = xavier_uniform_,
         bias_init: Callable = zeros_,
+        drop: float = 0,
     ):
         """
         Args:
@@ -39,7 +40,8 @@ class Dense(nn.Linear):
         self.weight_init = weight_init
         self.bias_init = bias_init
         super(Dense, self).__init__(in_features, out_features, bias)
-
+        
+        self.drop = drop
         self.activation = activation
         if self.activation is None:
             self.activation = nn.Identity()
@@ -50,6 +52,6 @@ class Dense(nn.Linear):
             self.bias_init(self.bias)
 
     def forward(self, input: torch.Tensor):
-        y = F.linear(input, self.weight, self.bias)
+        y = F.dropout(F.linear(input, self.weight, self.bias),self.drop, not(self.training), True) # only drop during inference
         y = self.activation(y)
         return y

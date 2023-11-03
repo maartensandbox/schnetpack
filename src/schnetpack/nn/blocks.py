@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import schnetpack.nn as snn
 
-__all__ = ["build_prob_mlp","build_mlp", "build_gated_equivariant_mlp"]
+__all__ = ["build_prob_mlp", "build_mlp", "build_gated_equivariant_mlp"]
 
 from bayesian_torch.layers import LinearReparameterization
 
@@ -75,6 +75,7 @@ def build_mlp(
     activation: Callable = F.silu,
     last_bias: bool = True,
     last_zero_init: bool = False,
+    droprate: float = 0,
 ) -> nn.Module:
     """
     Build multiple layer fully connected perceptron neural network.
