@@ -1,4 +1,5 @@
 from .atomwise import *
+from .prob_atomwise import *
 from .response import *
 from .distances import *
 from .nuclear_repulsion import *

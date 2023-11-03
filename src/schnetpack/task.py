@@ -22,7 +22,7 @@ class ModelOutput(nn.Module):
         name: str,
         loss_fn: Optional[nn.Module] = None,
         loss_weight: float = 1.0,
-        metrics: Optional[Dict[str, Metric]] = None,
+        metrics: Optional[Dict[str, Metric]] = {},
         constraints: Optional[List[torch.nn.Module]] = None,
         target_property: Optional[str] = None,
     ):
