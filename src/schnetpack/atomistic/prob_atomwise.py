@@ -11,6 +11,7 @@ import schnetpack.properties as properties
 __all__ = ["BNN_Var_Atomwise"]
 
 
+
 class BNN_Var_Atomwise(nn.Module):
     """
     Predicts probabilistic atom-wise contributions and accumulates global prediction, e.g. for the energy.
@@ -25,6 +26,7 @@ class BNN_Var_Atomwise(nn.Module):
         n_hidden: Optional[Union[int, Sequence[int]]] = None,
         n_layers: int = 2,
         aggregation_mode: str = "sum",
+        activation: Callable = F.silu,
         output_key: str = "y",
         per_atom_output_key: Optional[str] = None,
         KL_key: Optional[str] = None,
@@ -73,6 +75,7 @@ class BNN_Var_Atomwise(nn.Module):
             n_in=n_in,
             n_out=n_out,
             bayesian_params = bnn_prior_parameters,
+            activation = activation,
             n_hidden=n_hidden,
             n_layers=n_layers,
         )
@@ -82,11 +85,12 @@ class BNN_Var_Atomwise(nn.Module):
     def forward(self, inputs: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
         # predict atomwise contributions
 
-        # manually walk through the sequential layers to accumulate KL
-        (y,tot_kl) = self.outnet[0].forward(inputs["scalar_representation"],True)
-        for l in range(1,len(self.outnet)):
-            (y,kl) = self.outnet[l].forward(y,True)
-            tot_kl += kl
+        y = inputs["scalar_representation"]
+        
+        for l in range(0,len(self.outnet)-1):
+            y = self.outnet[l].forward(y)
+
+        (y,tot_kl) = self.outnet[-1].forward(y,True)
 
         # accumulate the per-atom output if necessary
         if self.per_atom_output_key is not None:

@@ -13,6 +13,7 @@ def build_prob_mlp(
     n_in: int,
     n_out: int,
     bayesian_params: dict,
+    activation: Callable = F.silu,
     n_hidden: Optional[Union[int, Sequence[int]]] = None,
     n_layers: int = 2,
 ) -> nn.Module:
@@ -53,11 +54,9 @@ def build_prob_mlp(
 
     # assign a Dense layer (with activation function) to each hidden layer
     layers = [
-        LinearReparameterization(n_neurons[i], n_neurons[i + 1], prior_mean = prior_mean, prior_variance = prior_variance, posterior_mu_init = posterior_mu_init, posterior_rho_init = posterior_rho_init)
+        snn.Dense(n_neurons[i], n_neurons[i + 1], activation=activation)
         for i in range(n_layers - 1)
     ]
-    # assign a Dense layer (without activation function) to the output layer
-
 
     layers.append(
         LinearReparameterization(n_neurons[-2], n_neurons[-1], prior_mean = prior_mean, prior_variance = prior_variance, posterior_mu_init = posterior_mu_init, posterior_rho_init = posterior_rho_init)
@@ -66,8 +65,6 @@ def build_prob_mlp(
 
     out_net = nn.Sequential(*layers)
     return out_net
-
-
 
 
 def build_mlp(
